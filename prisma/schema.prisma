@@ -1,0 +1,122 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+}
+
+model CategoryProduct {
+  id          Int       @id @default(autoincrement())
+  name        String @unique
+  slug        String
+  image       String  
+  Product     Product[]
+}
+
+model Product {
+  id          Int       @id @default(autoincrement())
+  name        String
+  slug        String
+  description String
+  price       Decimal
+  stock       Int
+  image       String
+  like        Int?      @default(0)
+  Cart        Cart[]
+  Wislist     Wislist[]
+  DetailOrder DetailOrder[]
+  ProductReview ProductReview[]
+  categoryId  Int?
+  CategoryProduct  CategoryProduct? @relation(fields: [categoryId], references: [id])
+}
+
+model District {
+  id          Int @id @default(autoincrement())
+  name        String
+  cityId      Int
+  City        City? @relation(fields: [cityId], references: [id])
+  UserAddress UserAddress[]
+}
+
+model City {
+  id          Int @id @default(autoincrement())
+  name        String
+  District    District[]
+  provinceId  Int
+  Province    Province? @relation(fields: [provinceId], references: [id])
+  UserAddress UserAddress[]
+} 
+
+model Province {
+  id          Int @id @default(autoincrement())
+  name        String
+  City        City[]
+  UserAddress UserAddress[]
+}
+
+model UserAddress {
+  id          Int @id @default(autoincrement())
+  provinceId  Int
+  cityId      Int
+  districtId  Int
+  User        User[]
+  Province    Province? @relation(fields: [provinceId], references: [id])
+  City        City? @relation(fields: [cityId], references: [id])
+  District    District? @relation(fields: [districtId], references: [id])
+}
+
+model User {
+  id          Int @id @default(autoincrement())
+  username    String
+  email       String @unique
+  password    String
+  phoneNumber String
+  Cart        Cart[]
+  Order       Order[]
+  userAddress Int
+  UserAddress UserAddress? @relation(fields: [userAddress], references: [id])
+}
+
+model Cart {
+  id          Int @id @default(autoincrement())
+  quantity    Int
+  userId      Int
+  productId   Int
+  User        User? @relation(fields: [userId], references: [id])
+  Product     Product? @relation(fields: [productId], references: [id])
+}
+
+model Wislist {
+  id          Int @id @default(autoincrement())
+  productId   Int
+  Product     Product? @relation(fields: [productId], references: [id])
+}
+
+model Order {
+  id          Int @id @default(autoincrement())
+  orderDate   DateTime @default(now())
+  status      String
+  detailOrder DetailOrder[] 
+  userId      Int
+  User        User? @relation(fields: [userId], references: [id])
+}
+
+model DetailOrder {
+  id          Int @id @default(autoincrement())
+  price       Int
+  amount      Int
+  total       Int
+  orderId     Int
+  productId   Int
+  Order       Order? @relation(fields: [orderId], references: [id])
+  Product     Product? @relation(fields: [productId], references: [id])
+}
+
+model ProductReview {
+  id          Int @id @default(autoincrement()) 
+  review      String
+  productId   Int
+  Product     Product? @relation(fields: [productId], references: [id])
+}
